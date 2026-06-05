@@ -23,7 +23,7 @@ class AlarmesNotifier extends AsyncNotifier<List<Alarme>> {
   Future<void> atualizar(Alarme alarme) async {
     final db = await ref.read(appDatabaseProvider.future);
     await db.alarmeDao.atualizar(alarme);
-    if (!alarme.ativo) await _cancelarSemCrash(alarme.id!);
+    if (!alarme.ativo && alarme.id != null) await _cancelarSemCrash(alarme.id!);
     await Reagendador.executar(db: db);
     ref.invalidateSelf();
   }

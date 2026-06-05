@@ -39,7 +39,7 @@ class _EscalaPageState extends ConsumerState<EscalaPage> {
         _ativa = true;
         _diasTrabalho = escala.diasTrabalho;
         _diasFolga = escala.diasFolga;
-        _referencia = DateTime.parse(escala.dataInicioReferencia);
+        _referencia = DateTime.tryParse(escala.dataInicioReferencia) ?? DateTime.now();
         final match = _presets
             .where((p) => p.$2 == escala.diasTrabalho && p.$3 == escala.diasFolga)
             .firstOrNull;
