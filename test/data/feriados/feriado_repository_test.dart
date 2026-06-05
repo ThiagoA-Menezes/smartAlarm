@@ -41,15 +41,15 @@ void main() {
   setUp(() => db = AppDatabase(NativeDatabase.memory()));
   tearDown(() => db.close());
 
-  FeriadoRepository _repo({List<String> datas = const ['2025-01-01', '2025-04-21']}) =>
+  FeriadoRepository makeRepo({List<String> datas = const ['2025-01-01', '2025-04-21']}) =>
       FeriadoRepository(db, client: _mockOk(datas));
 
   // ─── Critério de aceite ──────────────────────────────────────────────────
   // "feriado do dia aparece e bloqueia o alarme"
   test('sincronizarAno persiste nacionais da BrasilAPI no cache', () async {
-    await _repo().sincronizarAno(2025);
+    await makeRepo().sincronizarAno(2025);
 
-    final feriados = await _repo().feriadosDoAno(2025);
+    final feriados = await makeRepo().feriadosDoAno(2025);
     expect(feriados.length, equals(2));
     expect(feriados.map((f) => f.data),
         containsAll(['2025-01-01', '2025-04-21']));
@@ -89,9 +89,9 @@ void main() {
   });
 
   test('inserirManual adiciona feriado municipal sem remover nacionais', () async {
-    await _repo().sincronizarAno(2025);
+    await makeRepo().sincronizarAno(2025);
 
-    await _repo().inserirManual(const FeriadoCache(
+    await makeRepo().inserirManual(const FeriadoCache(
       data: '2025-07-09',
       nome: 'Revolução Constitucionalista',
       tipo: 'municipal',
@@ -99,7 +99,7 @@ void main() {
       ano: 2025,
     ));
 
-    final feriados = await _repo().feriadosDoAno(2025);
+    final feriados = await makeRepo().feriadosDoAno(2025);
     expect(feriados.length, equals(3));
     expect(feriados.any((f) => f.tipo == 'municipal'), isTrue);
     expect(feriados.any((f) => f.tipo == 'nacional'), isTrue);
@@ -127,8 +127,8 @@ void main() {
   });
 
   test('deletar remove feriado do cache', () async {
-    await _repo().sincronizarAno(2025);
-    final repo = _repo();
+    await makeRepo().sincronizarAno(2025);
+    final repo = makeRepo();
     final feriados = await repo.feriadosDoAno(2025);
     final id = feriados.first.id!;
 
@@ -144,8 +144,8 @@ void main() {
     await FeriadoRepository(db, client: _mockOk(['2026-04-21']))
         .sincronizarAno(2026);
 
-    final de2025 = await _repo().feriadosDoAno(2025);
-    final de2026 = await _repo().feriadosDoAno(2026);
+    final de2025 = await makeRepo().feriadosDoAno(2025);
+    final de2026 = await makeRepo().feriadosDoAno(2026);
 
     expect(de2025.every((f) => f.ano == 2025), isTrue);
     expect(de2026.every((f) => f.ano == 2026), isTrue);
@@ -167,7 +167,7 @@ void main() {
       db,
       fontes: [
         _FonteExtra([
-          FeriadoCache(
+          const FeriadoCache(
             data: '2025-01-01',
             nome: 'Ano Novo',
             tipo: 'nacional',
@@ -176,7 +176,7 @@ void main() {
           ),
         ]),
         _FonteExtra([
-          FeriadoCache(
+          const FeriadoCache(
             data: '2025-07-09',
             nome: 'Feriado Estadual Extra',
             tipo: 'estadual',

@@ -46,11 +46,11 @@ class FeriadosPage extends ConsumerWidget {
           return ListView(
             children: [
               if (nacionais.isNotEmpty) ...[
-                _Cabecalho(label: 'Nacional / Estadual'),
+                const _Cabecalho(label: 'Nacional / Estadual'),
                 ...nacionais.map((f) => _FeriadoTile(feriado: f)),
               ],
               if (municipais.isNotEmpty) ...[
-                _Cabecalho(label: 'Municipal (manual)'),
+                const _Cabecalho(label: 'Municipal (manual)'),
                 ...municipais.map(
                   (f) => _FeriadoTile(feriado: f, deletavel: true),
                 ),

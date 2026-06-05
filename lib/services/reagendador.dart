@@ -100,7 +100,7 @@ class Reagendador {
         dia: dia,
         diasFeriados: feriados,
         escala: escala,
-      )) continue;
+      )) { continue; }
 
       final alvo = _buildAlarmDateTime(dia, alarme.hora);
       if (alvo.isAfter(DateTime.now())) {
