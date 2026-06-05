@@ -43,13 +43,17 @@ void main() {
   });
 
   testWidgets('card educacional de bateria OEM sempre visível', (tester) async {
-    // Com status vazio cada card exibe "Conceder", ultrapassando o viewport
-    // padrão de 800×600. Aumenta para garantir que todos os itens sejam construídos.
-    tester.view.physicalSize = const Size(800, 2000);
-    addTearDown(tester.view.resetPhysicalSize);
-
     await tester.pumpWidget(_wrap({}));
     await tester.pumpAndSettle();
+
+    // Com status vazio cada card exibe "Conceder", empurrando o card OEM
+    // para além do viewport. Rolar até o widget confirma que ele existe e
+    // está acessível.
+    await tester.scrollUntilVisible(
+      find.textContaining('Xiaomi'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.textContaining('Xiaomi'), findsOneWidget);
     expect(find.text('Abrir configurações do app'), findsOneWidget);
   });
