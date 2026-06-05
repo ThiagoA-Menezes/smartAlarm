@@ -142,6 +142,7 @@ import UIKit
 
 // MARK: – AKAlarmDelegate
 
+#if !targetEnvironment(simulator)
 @available(iOS 26.0, *)
 extension AppDelegate: AKAlarmDelegate {
   func alarmDidStart(_ alarm: AKAlarm) {
@@ -158,6 +159,7 @@ extension AppDelegate: AKAlarmDelegate {
     savedIds = ids
   }
 }
+#endif
 
 // MARK: – FlutterStreamHandler
 
