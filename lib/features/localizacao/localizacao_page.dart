@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:alarme_feriados/domain/models/localizacao.dart';
@@ -9,7 +9,8 @@ class LocalizacaoPage extends ConsumerStatefulWidget {
   const LocalizacaoPage({super.key});
 
   @override
-  ConsumerState<LocalizacaoPage> createState() => _LocalizacaoPageState();
+  ConsumerState<LocalizacaoPage> createState() =>
+      _LocalizacaoPageState();
 }
 
 class _LocalizacaoPageState extends ConsumerState<LocalizacaoPage> {
@@ -54,9 +55,19 @@ class _LocalizacaoPageState extends ConsumerState<LocalizacaoPage> {
       final loc = await LocalizacaoService.detectar();
       if (!mounted) return;
       if (loc == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Não foi possível detectar a localização.'),
+        showCupertinoDialog<void>(
+          context: context,
+          builder: (ctx) => CupertinoAlertDialog(
+            title: const Text('Localização'),
+            content: const Text(
+                'Não foi possível detectar a localização.'),
+            actions: [
+              CupertinoDialogAction(
+                isDefaultAction: true,
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('OK'),
+              ),
+            ],
           ),
         );
         return;
@@ -73,8 +84,19 @@ class _LocalizacaoPageState extends ConsumerState<LocalizacaoPage> {
     final cidade = _cidadeCtrl.text.trim();
     final estado = _estadoCtrl.text.trim().toUpperCase();
     if (cidade.isEmpty || estado.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Preencha cidade e estado.')),
+      showCupertinoDialog<void>(
+        context: context,
+        builder: (ctx) => CupertinoAlertDialog(
+          title: const Text('Campos obrigatórios'),
+          content: const Text('Preencha cidade e estado.'),
+          actions: [
+            CupertinoDialogAction(
+              isDefaultAction: true,
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
       );
       return;
     }
@@ -91,62 +113,111 @@ class _LocalizacaoPageState extends ConsumerState<LocalizacaoPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Localização')),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          FilledButton.tonal(
-            onPressed: _detectando ? null : _detectar,
-            child: _detectando
-                ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Text('Detectar automaticamente'),
+    return CupertinoPageScaffold(
+      navigationBar: CupertinoNavigationBar(
+        middle: const Text('Localização'),
+        trailing: CupertinoButton(
+          padding: EdgeInsets.zero,
+          onPressed: _salvar,
+          child: const Text(
+            'Salvar',
+            style: TextStyle(fontWeight: FontWeight.w600),
           ),
-          const SizedBox(height: 24),
-          const Divider(),
-          const SizedBox(height: 8),
-          TextField(
-            controller: _cidadeCtrl,
-            decoration: const InputDecoration(
-              labelText: 'Cidade',
-              border: OutlineInputBorder(),
-            ),
-            textCapitalization: TextCapitalization.words,
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _estadoCtrl,
-            decoration: const InputDecoration(
-              labelText: 'Estado (UF)',
-              border: OutlineInputBorder(),
-              counterText: '',
-            ),
-            maxLength: 2,
-            textCapitalization: TextCapitalization.characters,
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _ibgeCtrl,
-            decoration: const InputDecoration(
-              labelText: 'Código IBGE (opcional)',
-              helperText: 'Necessário para feriados municipais',
-              border: OutlineInputBorder(),
-              counterText: '',
-            ),
-            keyboardType: TextInputType.number,
-            maxLength: 7,
-          ),
-          const SizedBox(height: 32),
-          FilledButton(
-            onPressed: _salvar,
-            child: const Text('Salvar'),
-          ),
-        ],
+        ),
       ),
+      child: SafeArea(
+        top: false,
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            const SizedBox(height: 8),
+            CupertinoButton.filled(
+              onPressed: _detectando ? null : _detectar,
+              child: _detectando
+                  ? const CupertinoActivityIndicator(
+                      color: CupertinoColors.white)
+                  : const Text('Detectar automaticamente'),
+            ),
+            const SizedBox(height: 24),
+            const Divider(),
+            const SizedBox(height: 8),
+            _Campo(
+              label: 'Cidade',
+              controller: _cidadeCtrl,
+              placeholder: 'Ex: São Paulo',
+              textCapitalization: TextCapitalization.words,
+            ),
+            const SizedBox(height: 12),
+            _Campo(
+              label: 'Estado (UF)',
+              controller: _estadoCtrl,
+              placeholder: 'Ex: SP',
+              maxLength: 2,
+              textCapitalization: TextCapitalization.characters,
+            ),
+            const SizedBox(height: 12),
+            _Campo(
+              label: 'Código IBGE (opcional)',
+              controller: _ibgeCtrl,
+              placeholder: '7 dígitos – para feriados municipais',
+              keyboardType: TextInputType.number,
+              maxLength: 7,
+            ),
+            const SizedBox(height: 32),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Campo extends StatelessWidget {
+  const _Campo({
+    required this.label,
+    required this.controller,
+    required this.placeholder,
+    this.maxLength,
+    this.keyboardType,
+    this.textCapitalization = TextCapitalization.none,
+  });
+
+  final String label;
+  final TextEditingController controller;
+  final String placeholder;
+  final int? maxLength;
+  final TextInputType? keyboardType;
+  final TextCapitalization textCapitalization;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 6),
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontSize: 13,
+              color: CupertinoColors.secondaryLabel,
+            ),
+          ),
+        ),
+        CupertinoTextField(
+          controller: controller,
+          placeholder: placeholder,
+          padding:
+              const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          maxLength: maxLength,
+          keyboardType: keyboardType,
+          textCapitalization: textCapitalization,
+          clearButtonMode: OverlayVisibilityMode.editing,
+          decoration: BoxDecoration(
+            color: CupertinoColors.tertiarySystemFill,
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      ],
     );
   }
 }

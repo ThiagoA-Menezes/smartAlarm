@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:alarme_feriados/core/relogio.dart';
@@ -14,66 +14,115 @@ import 'package:alarme_feriados/features/localizacao/localizacao_page.dart';
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
 
+  void _mostrarMenu(BuildContext context) {
+    showCupertinoModalPopup<void>(
+      context: context,
+      builder: (ctx) => CupertinoActionSheet(
+        actions: [
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.pop(ctx);
+              Navigator.push(
+                context,
+                CupertinoPageRoute<void>(builder: (_) => const FeriadosPage()),
+              );
+            },
+            child: const Text('Feriados'),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.pop(ctx);
+              Navigator.push(
+                context,
+                CupertinoPageRoute<void>(builder: (_) => const EscalaPage()),
+              );
+            },
+            child: const Text('Minha escala'),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.pop(ctx);
+              Navigator.push(
+                context,
+                CupertinoPageRoute<void>(
+                    builder: (_) => const LocalizacaoPage()),
+              );
+            },
+            child: const Text('Localização'),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.pop(ctx);
+              Navigator.push(
+                context,
+                CupertinoPageRoute<void>(
+                    builder: (_) => const ConfiguracoesPage()),
+              );
+            },
+            child: const Text('Configurações'),
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () => Navigator.pop(ctx),
+          isDefaultAction: true,
+          child: const Text('Cancelar'),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(alarmesProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Alarmes'),
-        actions: [
-          PopupMenuButton<String>(
-            onSelected: (v) {
-              final route = switch (v) {
-                'feriados' => MaterialPageRoute<void>(
-                    builder: (_) => const FeriadosPage(),
-                  ),
-                'escala' => MaterialPageRoute<void>(
-                    builder: (_) => const EscalaPage(),
-                  ),
-                'localizacao' => MaterialPageRoute<void>(
-                    builder: (_) => const LocalizacaoPage(),
-                  ),
-                'configuracoes' => MaterialPageRoute<void>(
-                    builder: (_) => const ConfiguracoesPage(),
-                  ),
-                _ => null,
-              };
-              if (route != null) Navigator.push(context, route);
-            },
-            itemBuilder: (_) => const [
-              PopupMenuItem(value: 'feriados', child: Text('Feriados')),
-              PopupMenuItem(value: 'escala', child: Text('Minha escala')),
-              PopupMenuItem(
-                value: 'localizacao',
-                child: Text('Localização'),
+    return CupertinoPageScaffold(
+      navigationBar: CupertinoNavigationBar(
+        middle: const Text('Alarmes'),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CupertinoButton(
+              padding: EdgeInsets.zero,
+              onPressed: () => _mostrarMenu(context),
+              child: const Icon(CupertinoIcons.ellipsis_circle),
+            ),
+            CupertinoButton(
+              padding: const EdgeInsets.only(left: 8),
+              onPressed: () => Navigator.push(
+                context,
+                CupertinoPageRoute<void>(
+                  builder: (_) => const AlarmeCriarEditarPage(),
+                ),
               ),
-              PopupMenuItem(
-                value: 'configuracoes',
-                child: Text('Configurações'),
-              ),
-            ],
-          ),
-        ],
-      ),
-      body: state.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Erro: $e')),
-        data: (alarmes) => alarmes.isEmpty
-            ? const Center(child: Text('Nenhum alarme cadastrado.'))
-            : ListView.builder(
-                itemCount: alarmes.length,
-                itemBuilder: (_, i) => _AlarmeTile(alarme: alarmes[i]),
-              ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute<void>(
-            builder: (_) => const AlarmeCriarEditarPage(),
-          ),
+              child: const Icon(CupertinoIcons.add),
+            ),
+          ],
         ),
-        child: const Icon(Icons.add),
+      ),
+      child: SafeArea(
+        top: false,
+        child: state.when(
+          loading: () =>
+              const Center(child: CupertinoActivityIndicator()),
+          error: (e, _) => Center(child: Text('Erro: $e')),
+          data: (alarmes) => alarmes.isEmpty
+              ? const Center(
+                  child: Text(
+                    'Nenhum alarme cadastrado.',
+                    style: TextStyle(
+                        color: CupertinoColors.secondaryLabel),
+                  ),
+                )
+              : ListView.separated(
+                  itemCount: alarmes.length,
+                  separatorBuilder: (_, __) => const Divider(
+                    height: 0,
+                    indent: 16,
+                  ),
+                  itemBuilder: (_, i) =>
+                      _AlarmeTile(alarme: alarmes[i]),
+                ),
+        ),
       ),
     );
   }
@@ -92,33 +141,61 @@ class _AlarmeTile extends ConsumerWidget {
       key: ValueKey(alarme.id),
       direction: DismissDirection.endToStart,
       background: Container(
-        color: Colors.red,
+        color: CupertinoColors.destructiveRed,
         alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 16),
-        child: const Icon(Icons.delete, color: Colors.white),
+        padding: const EdgeInsets.only(right: 20),
+        child: const Icon(CupertinoIcons.delete,
+            color: CupertinoColors.white),
       ),
       onDismissed: (_) => notifier.deletar(alarme.id!),
-      child: ListTile(
-        leading: Switch(
-          value: alarme.ativo,
-          onChanged: (_) => notifier.toggleAtivo(alarme),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => Navigator.push(
+          context,
+          CupertinoPageRoute<void>(
+            builder: (_) => AlarmeCriarEditarPage(alarme: alarme),
+          ),
         ),
-        title: Text(
-          formatarHora(alarme.hora, use24h: use24h),
-          style: Theme.of(context).textTheme.headlineSmall,
-        ),
-        subtitle: Text(
-          alarme.titulo.isEmpty
-              ? _descDias(alarme.diasDaSemana)
-              : '${alarme.titulo} · ${_descDias(alarme.diasDaSemana)}',
-        ),
-        trailing: IconButton(
-          icon: const Icon(Icons.edit),
-          onPressed: () => Navigator.push(
-            context,
-            MaterialPageRoute<void>(
-              builder: (_) => AlarmeCriarEditarPage(alarme: alarme),
-            ),
+        child: Padding(
+          padding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      formatarHora(alarme.hora, use24h: use24h),
+                      style: TextStyle(
+                        fontSize: 52,
+                        fontWeight: FontWeight.w200,
+                        height: 1.1,
+                        color: alarme.ativo
+                            ? CupertinoColors.label
+                            : CupertinoColors.secondaryLabel,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      alarme.titulo.isEmpty
+                          ? _descDias(alarme.diasDaSemana)
+                          : '${alarme.titulo} · ${_descDias(alarme.diasDaSemana)}',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: alarme.ativo
+                            ? CupertinoColors.secondaryLabel
+                            : CupertinoColors.tertiaryLabel,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              CupertinoSwitch(
+                value: alarme.ativo,
+                onChanged: (_) => notifier.toggleAtivo(alarme),
+              ),
+            ],
           ),
         ),
       ),

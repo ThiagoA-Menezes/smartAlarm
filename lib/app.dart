@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 
 import 'package:alarme_feriados/features/alarme_tocando/alarme_tocando_page.dart';
 import 'package:alarme_feriados/features/home/home_page.dart';
@@ -30,13 +30,11 @@ class _AppState extends State<App> {
     super.dispose();
   }
 
-  // Revalida no momento do disparo antes de exibir a UI.
-  // Se hoje for feriado, Reagendador cancela e reagenda silenciosamente.
   void _onAlarmRing(AlarmRingEvent event) {
     Reagendador.validarDisparo(event.id).then((deve) {
       if (!deve) return;
       _navigatorKey.currentState?.push(
-        MaterialPageRoute<void>(
+        CupertinoPageRoute<void>(
           fullscreenDialog: true,
           builder: (_) => AlarmeTocandoPage(
             alarmId: event.id,
@@ -49,13 +47,12 @@ class _AppState extends State<App> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return CupertinoApp(
       navigatorKey: _navigatorKey,
       title: 'Alarme Feriados',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+      theme: const CupertinoThemeData(
+        primaryColor: CupertinoColors.systemOrange,
       ),
       home: const HomePage(),
     );
