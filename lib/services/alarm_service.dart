@@ -54,6 +54,7 @@ class AlarmService {
       });
       return;
     }
+    if (!Platform.isAndroid) return;
     await Alarm.set(
       alarmSettings: AlarmSettings(
         id: id,
@@ -77,6 +78,7 @@ class AlarmService {
       await _methodChannel.invokeMethod<void>('cancelAlarm', id);
       return;
     }
+    if (!Platform.isAndroid) return;
     await Alarm.stop(id);
   }
 
