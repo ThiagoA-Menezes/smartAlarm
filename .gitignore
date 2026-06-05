@@ -16,7 +16,7 @@ node_modules/
 .flutter-plugins
 .flutter-plugins-dependencies
 build/
-*.g.dart
+# *.g.dart — gerado pelo Drift, versionado intencionalmente
 *.freezed.dart
 
 # Android — gerado localmente, nunca commitar
