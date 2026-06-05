@@ -1,4 +1,6 @@
+#if !targetEnvironment(simulator)
 import AlarmKit
+#endif
 import AVFoundation
 import Flutter
 import UIKit
