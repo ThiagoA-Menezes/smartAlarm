@@ -1,43 +1,75 @@
-# Hi, I'm Thiago Menezes 👋
+# smartAlarm ⏰
 
-**Data Intelligence Specialist @ IBM Brazil**  
-Bridging advanced analytics, AI governance, and enterprise architecture — turning data complexity into competitive advantage at scale.
+> A location-aware alarm clock that knows when *not* to wake you up.
 
-🌐 **Portfolio → [thiagoa-menezes.github.io](https://thiagoa-menezes.github.io)**
+`smartAlarm` is a mobile alarm app that respects **public holidays** and your **work schedule**. If today is a holiday in your city or a day off in your shift, the alarm stays silent — no more manually disabling alarms every Friday night.
 
----
-
-### What I do
-
-- 🤖 **IBM watsonx** — pre-sales, solution architecture, and competitive intelligence for watsonx.ai, watsonx.data, and watsonx.governance
-- ⚙️ **Data Engineering** — ETL/ELT pipelines, Apache Spark, Kafka, Airflow, dbt, CDC
-- 🐍 **Python & Automation** — productivity tooling, Salesforce automation, data analysis
-- 🎯 **C-Level Engagement** — translating technical depth into business value
+🚧 **Status:** in active development (Flutter · Android + iOS).
 
 ---
 
-### Tech Stack
+## Why
 
-[![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)](https://thiagoa-menezes.github.io)
-[![Apache Spark](https://img.shields.io/badge/Apache%20Spark-FDEE21?style=for-the-badge&logo=apachespark&logoColor=black)](https://thiagoa-menezes.github.io)
-[![Apache Kafka](https://img.shields.io/badge/Apache%20Kafka-000?style=for-the-badge&logo=apachekafka)](https://thiagoa-menezes.github.io)
-[![Apache Airflow](https://img.shields.io/badge/Apache%20Airflow-017CEE?style=for-the-badge&logo=Apache%20Airflow&logoColor=white)](https://thiagoa-menezes.github.io)
-[![Google Cloud](https://img.shields.io/badge/GoogleCloud-%234285F4.svg?style=for-the-badge&logo=google-cloud&logoColor=white)](https://thiagoa-menezes.github.io)
-[![Azure](https://img.shields.io/badge/azure-%230072C6.svg?style=for-the-badge&logo=microsoftazure&logoColor=white)](https://thiagoa-menezes.github.io)
-[![AWS](https://img.shields.io/badge/AWS-%23FF9900.svg?style=for-the-badge&logo=amazon-aws&logoColor=white)](https://thiagoa-menezes.github.io)
-[![Kubernetes](https://img.shields.io/badge/kubernetes-%23326ce5.svg?style=for-the-badge&logo=kubernetes&logoColor=white)](https://thiagoa-menezes.github.io)
-[![Pandas](https://img.shields.io/badge/pandas-%23150458.svg?style=for-the-badge&logo=pandas&logoColor=white)](https://thiagoa-menezes.github.io)
-[![Power Bi](https://img.shields.io/badge/power_bi-F2C811?style=for-the-badge&logo=powerbi&logoColor=black)](https://thiagoa-menezes.github.io)
-[![Selenium](https://img.shields.io/badge/-selenium-%43B02A?style=for-the-badge&logo=selenium&logoColor=white)](https://thiagoa-menezes.github.io)
-[![Git](https://img.shields.io/badge/git-%23F05033.svg?style=for-the-badge&logo=git&logoColor=white)](https://thiagoa-menezes.github.io)
+Most alarm apps are dumb about context: they ring on holidays, on your days off, and force you to toggle them manually every week. `smartAlarm` adds a small "brain" between you and the alarm — it decides whether an alarm *should* ring based on the day of the week, your work schedule, and whether today is a holiday where you live.
 
----
+## Features
 
-### Connect
+- 📅 **Holiday-aware** — won't ring on national/state holidays for your location (Brazil first, via public holiday data).
+- 🔁 **Work-schedule aware** — supports fixed weeks (e.g. Mon–Fri) and rotating shifts (5x2, 6x1, 4x2). Flags for *"do you work weekends?"* and *"do you work on holidays?"*.
+- 📍 **Location-based** — detects your state/municipality (with manual override for privacy and travel).
+- ⏰ **Reliable system-level alarms** — fires with the app closed, screen off, even in silent/Focus mode.
+- 🔧 Standard alarm controls — time, repeat days, custom sound, volume, vibration, snooze.
 
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-%230077B5.svg?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/thiagoamenezes/)
-[![Portfolio](https://img.shields.io/badge/Portfolio-%230F62FE.svg?style=for-the-badge&logo=github&logoColor=white)](https://thiagoa-menezes.github.io)
+## Tech stack
 
----
+| Layer | Choice |
+|---|---|
+| Framework | Flutter (single codebase, Android + iOS) |
+| Alarm engine | `alarm` package — `AlarmManager`/foreground service (Android) + AlarmKit (iOS 26+) |
+| Local storage | drift (SQLite) |
+| State | Riverpod |
+| Location | geolocator + geocoding |
+| Holidays | BrasilAPI (national), pluggable for state/municipal sources |
 
-*São Paulo, SP · Brazil*
+## Platform requirements
+
+- **Android:** requires the *exact alarm* permission (`SCHEDULE_EXACT_ALARM`), requested at runtime.
+- **iOS:** requires **iOS 26+** (AlarmKit) for reliable alarms that override silent/Focus mode.
+
+## Getting started
+
+> The app is still being built; these steps describe the intended dev setup.
+
+```bash
+git clone https://github.com/ThiagoA-Menezes/smartAlarm.git
+cd smartAlarm
+flutter pub get
+flutter run
+```
+
+iOS builds require macOS + Xcode and a physical device running iOS 26.
+
+## Project structure
+
+```
+lib/
+├── core/        # permissions, date helpers, constants
+├── data/        # drift DB, holiday & location repositories
+├── domain/      # pure models + business logic (shouldRing rule)
+├── services/    # alarm engine wrapper, rescheduler
+├── features/    # screens (one folder per feature) + Riverpod providers
+└── ui/          # shared widgets and theme
+```
+
+## Roadmap
+
+Development is organized into small, ordered sprints (S0–S13): bootstrap & quality gates → domain models → core ring-decision logic → persistence → holidays → location → alarm engine → rescheduler → UI → polish → release.
+
+## License
+
+TBD.
+
+## Author
+
+**Thiago Menezes** — Data Intelligence Specialist @ IBM Brazil
+🌐 [thiagoa-menezes.github.io](https://thiagoa-menezes.github.io/) · São Paulo, Brazil
