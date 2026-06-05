@@ -61,9 +61,11 @@ import UIKit
     )
     eventChannel.setStreamHandler(self)
 
+    #if !targetEnvironment(simulator)
     if #available(iOS 26.0, *) {
       AKAlarmManager.shared.delegate = self
     }
+    #endif
 
     GeneratedPluginRegistrant.register(with: self)
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
@@ -71,6 +73,7 @@ import UIKit
 
   // MARK: – AlarmKit
 
+  #if !targetEnvironment(simulator)
   @available(iOS 26.0, *)
   private func requestAuthorization() async -> Bool {
     do {
@@ -116,6 +119,8 @@ import UIKit
       result(FlutterError(code: "CANCEL_ERROR", message: error.localizedDescription, details: nil))
     }
   }
+
+  #endif
 
   // MARK: – Audio
 
