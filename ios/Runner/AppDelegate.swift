@@ -7,8 +7,6 @@ import UIKit
 
 @main
 @objc class AppDelegate: FlutterAppDelegate {
-  // Maps Flutter alarm id → AKAlarm identifier; persisted in UserDefaults so
-  // alarmDidStart can resolve the id after an app kill/reboot.
   private var savedIds: [String: String] {
     get { UserDefaults.standard.dictionary(forKey: "_akIds") as? [String: String] ?? [:] }
     set { UserDefaults.standard.set(newValue, forKey: "_akIds") }
@@ -28,6 +26,7 @@ import UIKit
       binaryMessenger: controller.binaryMessenger
     )
     methodChannel.setMethodCallHandler { [weak self] call, result in
+      #if !targetEnvironment(simulator)
       guard #available(iOS 26.0, *) else {
         result(FlutterMethodNotImplemented)
         return
@@ -53,6 +52,9 @@ import UIKit
       default:
         result(FlutterMethodNotImplemented)
       }
+      #else
+      result(FlutterMethodNotImplemented)
+      #endif
     }
 
     let eventChannel = FlutterEventChannel(
@@ -71,7 +73,7 @@ import UIKit
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
-  // MARK: – AlarmKit
+  // MARK: - AlarmKit
 
   #if !targetEnvironment(simulator)
   @available(iOS 26.0, *)
@@ -119,14 +121,12 @@ import UIKit
       result(FlutterError(code: "CANCEL_ERROR", message: error.localizedDescription, details: nil))
     }
   }
-
   #endif
 
-  // MARK: – Audio
+  // MARK: - Audio
 
   private func playAudio() {
     guard audioPlayer == nil else { return }
-    // Flutter asset bundled at flutter_assets/<assetAudioPath>
     guard let url = Bundle.main.url(
       forResource: "alarme", withExtension: "mp3",
       subdirectory: "flutter_assets/assets/audio"
@@ -145,7 +145,7 @@ import UIKit
   }
 }
 
-// MARK: – AKAlarmDelegate
+// MARK: - AKAlarmDelegate
 
 #if !targetEnvironment(simulator)
 @available(iOS 26.0, *)
@@ -166,7 +166,7 @@ extension AppDelegate: AKAlarmDelegate {
 }
 #endif
 
-// MARK: – FlutterStreamHandler
+// MARK: - FlutterStreamHandler
 
 extension AppDelegate: FlutterStreamHandler {
   func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
