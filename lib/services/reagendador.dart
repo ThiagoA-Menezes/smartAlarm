@@ -104,6 +104,7 @@ class Reagendador {
 
       final alvo = _buildAlarmDateTime(dia, alarme.hora);
       if (alvo.isAfter(DateTime.now())) {
+        if (alarme.id == null) return;
         await AlarmService.agendar(
           id: alarme.id!,
           dateTime: alvo,
@@ -112,7 +113,7 @@ class Reagendador {
         return;
       }
     }
-    await AlarmService.cancelar(alarme.id!);
+    if (alarme.id != null) await AlarmService.cancelar(alarme.id!);
   }
 
   static Future<List<String>> _feriadosDoDia(
@@ -155,8 +156,11 @@ class Reagendador {
   /// DateTime() com args posicionais cria hora LOCAL — correto sob mudança de
   /// fuso/DST porque o SO converte para epoch no momento do agendamento.
   static DateTime _buildAlarmDateTime(DateTime dia, String hora) {
-    final p = hora.split(':');
-    return DateTime(dia.year, dia.month, dia.day, int.parse(p[0]), int.parse(p[1]));
+    final parts = hora.split(':');
+    if (parts.length < 2) return DateTime(dia.year, dia.month, dia.day);
+    final h = int.tryParse(parts[0]) ?? 0;
+    final m = int.tryParse(parts[1]) ?? 0;
+    return DateTime(dia.year, dia.month, dia.day, h, m);
   }
 
   static Future<AppDatabase> _abrirDb() async {

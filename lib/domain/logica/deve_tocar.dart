@@ -25,7 +25,8 @@ bool deveTocar({
 }
 
 bool _isDiaFolga(EscalaUsuario escala, DateTime dia) {
-  final ref = DateTime.parse(escala.dataInicioReferencia);
+  final ref = DateTime.tryParse(escala.dataInicioReferencia);
+  if (ref == null) return false;
   final diff = DateTime(dia.year, dia.month, dia.day)
       .difference(DateTime(ref.year, ref.month, ref.day))
       .inDays;

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:alarme_feriados/core/datas.dart';
@@ -39,9 +39,13 @@ class _EscalaPageState extends ConsumerState<EscalaPage> {
         _ativa = true;
         _diasTrabalho = escala.diasTrabalho;
         _diasFolga = escala.diasFolga;
-        _referencia = DateTime.parse(escala.dataInicioReferencia);
+        _referencia =
+            DateTime.tryParse(escala.dataInicioReferencia) ??
+                DateTime.now();
         final match = _presets
-            .where((p) => p.$2 == escala.diasTrabalho && p.$3 == escala.diasFolga)
+            .where((p) =>
+                p.$2 == escala.diasTrabalho &&
+                p.$3 == escala.diasFolga)
             .firstOrNull;
         _tipoSelecionado = match?.$1 ?? '5×2';
       });
@@ -58,14 +62,48 @@ class _EscalaPageState extends ConsumerState<EscalaPage> {
   }
 
   Future<void> _escolherReferencia() async {
-    final picked = await showDatePicker(
+    var selected = _referencia;
+    await showCupertinoModalPopup<void>(
       context: context,
-      initialDate: _referencia,
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2030),
-      helpText: 'Primeiro dia de trabalho do ciclo',
+      builder: (ctx) => Container(
+        height: 300,
+        color:
+            CupertinoColors.systemBackground.resolveFrom(ctx),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                CupertinoButton(
+                  child: const Text('Cancelar'),
+                  onPressed: () => Navigator.pop(ctx),
+                ),
+                CupertinoButton(
+                  child: const Text(
+                    'OK',
+                    style:
+                        TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  onPressed: () {
+                    setState(() => _referencia = selected);
+                    Navigator.pop(ctx);
+                  },
+                ),
+              ],
+            ),
+            Expanded(
+              child: CupertinoDatePicker(
+                mode: CupertinoDatePickerMode.date,
+                initialDateTime: _referencia,
+                minimumDate: DateTime(2020),
+                maximumDate: DateTime(2030),
+                onDateTimeChanged: (d) => selected = d,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
-    if (picked != null) setState(() => _referencia = picked);
   }
 
   Future<void> _salvar() async {
@@ -87,58 +125,160 @@ class _EscalaPageState extends ConsumerState<EscalaPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Minha escala')),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          SwitchListTile(
-            title: const Text('Usar escala de trabalho'),
-            subtitle: const Text(
-              'Alarmes não disparam em dias de folga do ciclo',
-            ),
-            value: _ativa,
-            onChanged: (v) => setState(() => _ativa = v),
+    return CupertinoPageScaffold(
+      navigationBar: CupertinoNavigationBar(
+        middle: const Text('Minha escala'),
+        trailing: CupertinoButton(
+          padding: EdgeInsets.zero,
+          onPressed: _salvar,
+          child: const Text(
+            'Salvar',
+            style: TextStyle(fontWeight: FontWeight.w600),
           ),
-          if (_ativa) ...[
-            const SizedBox(height: 16),
-            const Text('Tipo de escala'),
+        ),
+      ),
+      child: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
             const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              children: _presets
-                  .map(
-                    (p) => ChoiceChip(
-                      label: Text(p.$1),
-                      selected: _tipoSelecionado == p.$1,
-                      onSelected: (_) => _selecionarPreset(p.$1),
-                    ),
-                  )
-                  .toList(),
+            _CupertinoSwitchRow(
+              label: 'Usar escala de trabalho',
+              subtitle:
+                  'Alarmes não disparam em dias de folga do ciclo',
+              value: _ativa,
+              onChanged: (v) => setState(() => _ativa = v),
             ),
-            const SizedBox(height: 16),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: const Text('Data de referência'),
-              subtitle: Text(
-                'Primeiro dia de trabalho do ciclo: ${isoDate(_referencia)}',
+            if (_ativa) ...[
+              const SizedBox(height: 20),
+              const Text(
+                'TIPO DE ESCALA',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: CupertinoColors.secondaryLabel,
+                  letterSpacing: 0.8,
+                ),
               ),
-              trailing: const Icon(Icons.calendar_today_outlined),
-              onTap: _escolherReferencia,
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: Text(
+              const SizedBox(height: 8),
+              CupertinoSlidingSegmentedControl<String>(
+                groupValue: _tipoSelecionado,
+                children: {
+                  for (final p in _presets) p.$1: Text(p.$1),
+                },
+                onValueChanged: (v) {
+                  if (v != null) _selecionarPreset(v);
+                },
+              ),
+              const SizedBox(height: 20),
+              GestureDetector(
+                onTap: _escolherReferencia,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 12, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: CupertinoColors.tertiarySystemFill,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    mainAxisAlignment:
+                        MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment:
+                            CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Data de referência',
+                            style: TextStyle(
+                                fontSize: 16,
+                                color: CupertinoColors.label),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Primeiro dia de trabalho: ${isoDate(_referencia)}',
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color:
+                                  CupertinoColors.secondaryLabel,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const Icon(
+                        CupertinoIcons.calendar,
+                        color: CupertinoColors.secondaryLabel,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
                 'Ciclo: $_diasTrabalho dia(s) trabalhando, $_diasFolga dia(s) de folga',
-                style: Theme.of(context).textTheme.bodySmall,
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: CupertinoColors.secondaryLabel,
+                ),
               ),
-            ),
+            ],
+            const SizedBox(height: 32),
           ],
-          const SizedBox(height: 32),
-          FilledButton(
-            onPressed: _salvar,
-            child: const Text('Salvar'),
+        ),
+      ),
+    );
+  }
+}
+
+class _CupertinoSwitchRow extends StatelessWidget {
+  const _CupertinoSwitchRow({
+    required this.label,
+    this.subtitle,
+    required this.value,
+    required this.onChanged,
+  });
+
+  final String label;
+  final String? subtitle;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: CupertinoColors.tertiarySystemFill,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      padding: const EdgeInsets.symmetric(
+          horizontal: 12, vertical: 10),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: CupertinoColors.label,
+                  ),
+                ),
+                if (subtitle != null) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle!,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: CupertinoColors.secondaryLabel,
+                    ),
+                  ),
+                ],
+              ],
+            ),
           ),
+          CupertinoSwitch(value: value, onChanged: onChanged),
         ],
       ),
     );

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 
 import 'package:alarme_feriados/services/alarm_service.dart';
 
@@ -16,17 +16,21 @@ class AlarmeTocandoPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      child: Scaffold(
-        backgroundColor: Colors.black,
-        body: SafeArea(
+      child: CupertinoPageScaffold(
+        backgroundColor: CupertinoColors.black,
+        child: SafeArea(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              const Icon(Icons.alarm, size: 96, color: Colors.white),
+              const Icon(
+                CupertinoIcons.alarm_fill,
+                size: 96,
+                color: CupertinoColors.white,
+              ),
               Text(
                 titulo.isEmpty ? 'Alarme Feriados' : titulo,
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: CupertinoColors.white,
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
                 ),
@@ -37,12 +41,12 @@ class AlarmeTocandoPage extends StatelessWidget {
                 children: [
                   _BotaoAcao(
                     label: 'Soneca\n10 min',
-                    icon: Icons.snooze,
+                    icon: CupertinoIcons.moon_zzz_fill,
                     onTap: () => _soneca(context),
                   ),
                   _BotaoAcao(
                     label: 'Parar',
-                    icon: Icons.stop_circle_outlined,
+                    icon: CupertinoIcons.stop_circle_fill,
                     onTap: () => _parar(context),
                   ),
                 ],
@@ -82,15 +86,20 @@ class _BotaoAcao extends StatelessWidget {
       onTap: onTap,
       child: Column(
         children: [
-          CircleAvatar(
-            radius: 40,
-            backgroundColor: Colors.white24,
-            child: Icon(icon, size: 40, color: Colors.white),
+          Container(
+            width: 80,
+            height: 80,
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              color: Color(0x33FFFFFF),
+            ),
+            child: Icon(icon, size: 40, color: CupertinoColors.white),
           ),
           const SizedBox(height: 8),
           Text(
             label,
-            style: const TextStyle(color: Colors.white, fontSize: 14),
+            style: const TextStyle(
+                color: CupertinoColors.white, fontSize: 14),
             textAlign: TextAlign.center,
           ),
         ],

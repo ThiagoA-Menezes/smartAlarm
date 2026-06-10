@@ -9,6 +9,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  cupertino_icons: ^1.0.8
   flutter_riverpod: ^2.6.1
   drift: ^2.20.0
   sqlite3_flutter_libs: ^0.5.24
@@ -34,9 +35,13 @@ flutter_launcher_icons:
   android: launcher_icon
   ios: true
   image_path: assets/icon/icon.png
-  adaptive_icon_background: '#6750A4'
+  adaptive_icon_background: '#FF6B00'
   adaptive_icon_foreground: assets/icon/icon_foreground.png
   min_sdk_android: 21
+  web:
+    generate: false
+  macos:
+    generate: false
 
 flutter:
   uses-material-design: true

@@ -1,5 +1,5 @@
 import 'package:drift/native.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -18,7 +18,7 @@ Future<Widget> _wrap(AppDatabase db, {Alarme? alarme}) async {
       appDatabaseProvider.overrideWith((ref) => db),
       sharedPrefsProvider.overrideWithValue(prefs),
     ],
-    child: MaterialApp(home: AlarmeCriarEditarPage(alarme: alarme)),
+    child: CupertinoApp(home: AlarmeCriarEditarPage(alarme: alarme)),
   );
 }
 
@@ -41,22 +41,22 @@ void main() {
 
   testWidgets('botão excluir aparece apenas no modo edição', (tester) async {
     await tester.pumpWidget(await _wrap(db));
-    expect(find.byIcon(Icons.delete_outline), findsNothing);
+    expect(find.byIcon(CupertinoIcons.delete), findsNothing);
 
     const alarme = Alarme(id: 1, hora: '09:00', diasDaSemana: 0x7F);
     await tester.pumpWidget(await _wrap(db, alarme: alarme));
-    expect(find.byIcon(Icons.delete_outline), findsOneWidget);
+    expect(find.byIcon(CupertinoIcons.delete), findsOneWidget);
   });
 
-  testWidgets('snackbar ao salvar sem dias selecionados', (tester) async {
+  testWidgets('alerta ao salvar sem dias selecionados', (tester) async {
     await tester.pumpWidget(await _wrap(db));
-    // Deselect all (default 0x1F = Seg–Sex, 5 chips selected)
-    for (final label in ['Seg', 'Ter', 'Qua', 'Qui', 'Sex']) {
-      await tester.tap(find.widgetWithText(FilterChip, label));
+    // Desmarca todos (padrão 0x1F = Seg–Sex, 5 dias selecionados)
+    for (var i = 0; i < 5; i++) {
+      await tester.tap(find.byKey(ValueKey('dia-$i')));
       await tester.pump();
     }
     await tester.tap(find.text('Salvar'));
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(find.text('Selecione ao menos um dia.'), findsOneWidget);
   });
 }
