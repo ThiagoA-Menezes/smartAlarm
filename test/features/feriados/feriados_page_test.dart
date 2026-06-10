@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:drift/native.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' show Response;
@@ -25,7 +25,7 @@ Widget _wrap(AppDatabase db, {MockClient? client}) => ProviderScope(
           ),
         ),
       ],
-      child: const MaterialApp(home: FeriadosPage()),
+      child: const CupertinoApp(home: FeriadosPage()),
     );
 
 void main() {
@@ -48,7 +48,11 @@ void main() {
     final client = MockClient(
       (_) async => Response(
         jsonEncode([
-          {'date': '${DateTime.now().year}-01-01', 'name': 'Ano Novo', 'type': 'national'},
+          {
+            'date': '${DateTime.now().year}-01-01',
+            'name': 'Ano Novo',
+            'type': 'national'
+          },
         ]),
         200,
       ),
@@ -62,8 +66,7 @@ void main() {
 
   testWidgets('feriado de hoje exibe chip "Hoje"', (tester) async {
     final hoje = DateTime.now();
-    final dataHoje =
-        '${hoje.year.toString().padLeft(4, '0')}-'
+    final dataHoje = '${hoje.year.toString().padLeft(4, '0')}-'
         '${hoje.month.toString().padLeft(2, '0')}-'
         '${hoje.day.toString().padLeft(2, '0')}';
 
@@ -81,7 +84,8 @@ void main() {
     expect(find.text('Hoje'), findsOneWidget);
   });
 
-  testWidgets('feriado municipal aparece na seção "Municipal"', (tester) async {
+  testWidgets('feriado municipal aparece na seção "Municipal"',
+      (tester) async {
     final ano = DateTime.now().year;
     await db.feriadoCacheDao.inserir(FeriadoCache(
       data: '$ano-07-09',
@@ -97,9 +101,10 @@ void main() {
     expect(find.text('MUNICIPAL (MANUAL)'), findsOneWidget);
   });
 
-  testWidgets('botão sync está presente no AppBar', (tester) async {
+  testWidgets('botão sync está presente na barra de navegação',
+      (tester) async {
     await tester.pumpWidget(_wrap(db));
     await tester.pumpAndSettle();
-    expect(find.byIcon(Icons.sync), findsOneWidget);
+    expect(find.byIcon(CupertinoIcons.arrow_clockwise), findsOneWidget);
   });
 }

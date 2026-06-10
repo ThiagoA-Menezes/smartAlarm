@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -11,17 +11,17 @@ Future<Widget> _wrap({bool use24h = true}) async {
   final prefs = await SharedPreferences.getInstance();
   return ProviderScope(
     overrides: [sharedPrefsProvider.overrideWithValue(prefs)],
-    child: const MaterialApp(home: ConfiguracoesPage()),
+    child: const CupertinoApp(home: ConfiguracoesPage()),
   );
 }
 
 void main() {
-  testWidgets('exibe switch "Formato 24 horas" ativado por padrão', (tester) async {
+  testWidgets('exibe switch "Formato 24 horas" ativado por padrão',
+      (tester) async {
     await tester.pumpWidget(await _wrap());
     await tester.pumpAndSettle();
-    final sw = tester.widget<SwitchListTile>(
-      find.widgetWithText(SwitchListTile, 'Formato 24 horas'),
-    );
+    expect(find.text('Formato 24 horas'), findsOneWidget);
+    final sw = tester.widget<CupertinoSwitch>(find.byType(CupertinoSwitch));
     expect(sw.value, isTrue);
   });
 
@@ -51,7 +51,7 @@ void main() {
     expect(find.textContaining('07:00'), findsOneWidget);
 
     // Toggle para 12h
-    await tester.tap(find.byType(SwitchListTile));
+    await tester.tap(find.byType(CupertinoSwitch));
     await tester.pump();
 
     expect(find.textContaining('AM'), findsOneWidget);

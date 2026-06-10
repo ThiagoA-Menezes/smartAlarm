@@ -139,7 +139,7 @@ class _LocalizacaoPageState extends ConsumerState<LocalizacaoPage> {
                   : const Text('Detectar automaticamente'),
             ),
             const SizedBox(height: 24),
-            const Divider(),
+            Container(height: 0.5, color: CupertinoColors.separator),
             const SizedBox(height: 8),
             _Campo(
               label: 'Cidade',

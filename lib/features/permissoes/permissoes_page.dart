@@ -184,7 +184,7 @@ class _PermissaoCard extends StatelessWidget {
                         horizontal: 16, vertical: 8),
                     color: CupertinoColors.systemOrange,
                     borderRadius: BorderRadius.circular(8),
-                    minSize: 0,
+                    minimumSize: Size.zero,
                     onPressed: onConceder,
                     child: const Text(
                       'Conceder',
@@ -215,9 +215,9 @@ class _CartaoAlarmKitFoco extends StatelessWidget {
         color: CupertinoColors.tertiarySystemFill,
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Column(
+      child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: const [
+        children: [
           Row(
             children: [
               Icon(CupertinoIcons.moon_zzz,
@@ -299,7 +299,7 @@ class _CartaoOemBateria extends StatelessWidget {
                 horizontal: 16, vertical: 8),
             color: CupertinoColors.tertiarySystemGroupedBackground,
             borderRadius: BorderRadius.circular(8),
-            minSize: 0,
+            minimumSize: Size.zero,
             onPressed: openAppSettings,
             child: const Row(
               mainAxisSize: MainAxisSize.min,

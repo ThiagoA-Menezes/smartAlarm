@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart' show MissingPluginException, PlatformException;
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:alarme_feriados/features/alarme_tocando/alarme_tocando_page.dart';
 import 'package:alarme_feriados/features/home/home_page.dart';
@@ -18,10 +20,58 @@ class _AppState extends State<App> {
   final _navigatorKey = GlobalKey<NavigatorState>();
   late final StreamSubscription<AlarmRingEvent> _ringSubscription;
 
+  static const _prefPermissoesSolicitadas = 'permissoes_solicitadas';
+
   @override
   void initState() {
     super.initState();
     _ringSubscription = AlarmService.ringStream.listen(_onAlarmRing);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _solicitarPermissoesPrimeiraVez();
+    });
+  }
+
+  /// Na primeira abertura, explica e pede ao usuário a permissão para o
+  /// alarme tocar no horário exato (diálogo nativo do sistema na sequência).
+  Future<void> _solicitarPermissoesPrimeiraVez() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      if (prefs.getBool(_prefPermissoesSolicitadas) ?? false) return;
+
+      final context = _navigatorKey.currentContext;
+      if (context == null || !context.mounted) return;
+
+      final aceitou = await showCupertinoDialog<bool>(
+        context: context,
+        builder: (ctx) => CupertinoAlertDialog(
+          title: const Text('Permitir alarmes'),
+          content: const Text(
+            'Para que o alarme toque no horário programado, o app precisa '
+            'da sua permissão para notificações e alarmes exatos.',
+          ),
+          actions: [
+            CupertinoDialogAction(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Agora não'),
+            ),
+            CupertinoDialogAction(
+              isDefaultAction: true,
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Permitir'),
+            ),
+          ],
+        ),
+      );
+
+      if (aceitou == true) {
+        await AlarmService.solicitarPermissoes();
+      }
+      await prefs.setBool(_prefPermissoesSolicitadas, true);
+    } on MissingPluginException {
+      // Engine indisponível em testes host
+    } on PlatformException {
+      // Canal nativo indisponível nesta plataforma
+    }
   }
 
   @override

@@ -1,5 +1,5 @@
 import 'package:drift/native.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -9,7 +9,7 @@ import 'package:alarme_feriados/features/localizacao/localizacao_page.dart';
 
 Widget _wrap(AppDatabase db) => ProviderScope(
       overrides: [appDatabaseProvider.overrideWith((ref) => db)],
-      child: const MaterialApp(home: LocalizacaoPage()),
+      child: const CupertinoApp(home: LocalizacaoPage()),
     );
 
 void main() {
@@ -21,19 +21,17 @@ void main() {
   testWidgets('exibe campos cidade, estado e código IBGE', (tester) async {
     await tester.pumpWidget(_wrap(db));
     await tester.pumpAndSettle();
-    expect(find.widgetWithText(TextField, 'Cidade'), findsOneWidget);
-    expect(find.widgetWithText(TextField, 'Estado (UF)'), findsOneWidget);
-    expect(
-      find.widgetWithText(TextField, 'Código IBGE (opcional)'),
-      findsOneWidget,
-    );
+    expect(find.text('Cidade'), findsOneWidget);
+    expect(find.text('Estado (UF)'), findsOneWidget);
+    expect(find.text('Código IBGE (opcional)'), findsOneWidget);
+    expect(find.byType(CupertinoTextField), findsNWidgets(3));
   });
 
-  testWidgets('snackbar ao salvar sem cidade/estado', (tester) async {
+  testWidgets('alerta ao salvar sem cidade/estado', (tester) async {
     await tester.pumpWidget(_wrap(db));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Salvar'));
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(find.text('Preencha cidade e estado.'), findsOneWidget);
   });
 
@@ -42,18 +40,21 @@ void main() {
     final nav = GlobalKey<NavigatorState>();
     await tester.pumpWidget(ProviderScope(
       overrides: [appDatabaseProvider.overrideWith((ref) => db)],
-      child: MaterialApp(
+      child: CupertinoApp(
         navigatorKey: nav,
-        home: const Scaffold(body: Center(child: Text('home'))),
+        home: const CupertinoPageScaffold(
+          child: Center(child: Text('home')),
+        ),
       ),
     ));
     nav.currentState!.push(
-      MaterialPageRoute<void>(builder: (_) => const LocalizacaoPage()),
+      CupertinoPageRoute<void>(builder: (_) => const LocalizacaoPage()),
     );
     await tester.pumpAndSettle();
 
-    await tester.enterText(find.widgetWithText(TextField, 'Cidade'), 'Campinas');
-    await tester.enterText(find.widgetWithText(TextField, 'Estado (UF)'), 'SP');
+    await tester.enterText(
+        find.byType(CupertinoTextField).at(0), 'Campinas');
+    await tester.enterText(find.byType(CupertinoTextField).at(1), 'SP');
     await tester.tap(find.text('Salvar'));
     await tester.pumpAndSettle();
 

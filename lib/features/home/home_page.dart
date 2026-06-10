@@ -115,9 +115,10 @@ class HomePage extends ConsumerWidget {
                 )
               : ListView.separated(
                   itemCount: alarmes.length,
-                  separatorBuilder: (_, __) => const Divider(
-                    height: 0,
-                    indent: 16,
+                  separatorBuilder: (_, __) => Container(
+                    height: 0.5,
+                    margin: const EdgeInsets.only(left: 16),
+                    color: CupertinoColors.separator,
                   ),
                   itemBuilder: (_, i) =>
                       _AlarmeTile(alarme: alarmes[i]),

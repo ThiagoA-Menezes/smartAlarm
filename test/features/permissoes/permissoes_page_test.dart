@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -8,53 +8,37 @@ Widget _wrap(Map<String, bool> status) => ProviderScope(
       overrides: [
         permissoesStatusProvider.overrideWith((ref) async => status),
       ],
-      child: const MaterialApp(home: PermissoesPage()),
+      child: const CupertinoApp(home: PermissoesPage()),
     );
 
 void main() {
-  testWidgets('exibe AppBar com título', (tester) async {
+  // No host de testes (Linux) Platform.isAndroid/isIOS são false, então
+  // apenas o card de localização é exibido.
+  testWidgets('exibe barra de navegação com título', (tester) async {
     await tester.pumpWidget(_wrap({}));
     await tester.pumpAndSettle();
     expect(find.text('Permissões e bateria'), findsOneWidget);
   });
 
   testWidgets('ícone verde quando permissão concedida', (tester) async {
-    await tester.pumpWidget(_wrap({
-      'alarme': true,
-      'notificacao': true,
-      'localizacao': true,
-      'bateria': true,
-    }));
+    await tester.pumpWidget(_wrap({'localizacao': true}));
     await tester.pumpAndSettle();
-    expect(find.byIcon(Icons.check_circle), findsWidgets);
-    expect(find.byIcon(Icons.cancel_outlined), findsNothing);
+    expect(find.byIcon(CupertinoIcons.checkmark_circle_fill), findsWidgets);
+    expect(find.byIcon(CupertinoIcons.xmark_circle_fill), findsNothing);
+    expect(find.text('Conceder'), findsNothing);
   });
 
-  testWidgets('ícone vermelho e botão "Conceder" quando permissão negada', (tester) async {
-    await tester.pumpWidget(_wrap({
-      'alarme': false,
-      'notificacao': false,
-      'localizacao': false,
-      'bateria': false,
-    }));
+  testWidgets('ícone vermelho e botão "Conceder" quando permissão negada',
+      (tester) async {
+    await tester.pumpWidget(_wrap({'localizacao': false}));
     await tester.pumpAndSettle();
-    expect(find.byIcon(Icons.cancel_outlined), findsWidgets);
+    expect(find.byIcon(CupertinoIcons.xmark_circle_fill), findsWidgets);
     expect(find.text('Conceder'), findsWidgets);
   });
 
-  testWidgets('card educacional de bateria OEM sempre visível', (tester) async {
+  testWidgets('card de localização sempre visível', (tester) async {
     await tester.pumpWidget(_wrap({}));
     await tester.pumpAndSettle();
-
-    // Com status vazio cada card exibe "Conceder", empurrando o card OEM
-    // para além do viewport. Rolar até o widget confirma que ele existe e
-    // está acessível.
-    await tester.scrollUntilVisible(
-      find.textContaining('Xiaomi'),
-      200,
-      scrollable: find.byType(Scrollable).first,
-    );
-    expect(find.textContaining('Xiaomi'), findsOneWidget);
-    expect(find.text('Abrir configurações do app'), findsOneWidget);
+    expect(find.text('Localização'), findsOneWidget);
   });
 }

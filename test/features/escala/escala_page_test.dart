@@ -1,5 +1,5 @@
 import 'package:drift/native.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -9,7 +9,7 @@ import 'package:alarme_feriados/features/escala/escala_page.dart';
 
 Widget _wrap(AppDatabase db) => ProviderScope(
       overrides: [appDatabaseProvider.overrideWith((ref) => db)],
-      child: const MaterialApp(home: EscalaPage()),
+      child: const CupertinoApp(home: EscalaPage()),
     );
 
 void main() {
@@ -21,14 +21,14 @@ void main() {
   testWidgets('exibe switch de escala desativado inicialmente', (tester) async {
     await tester.pumpWidget(_wrap(db));
     await tester.pumpAndSettle();
-    final sw = tester.widget<SwitchListTile>(find.byType(SwitchListTile));
+    final sw = tester.widget<CupertinoSwitch>(find.byType(CupertinoSwitch));
     expect(sw.value, isFalse);
   });
 
   testWidgets('ativar switch exibe opções de preset', (tester) async {
     await tester.pumpWidget(_wrap(db));
     await tester.pumpAndSettle();
-    await tester.tap(find.byType(SwitchListTile));
+    await tester.tap(find.byType(CupertinoSwitch));
     await tester.pump();
     expect(find.text('5×2'), findsOneWidget);
     expect(find.text('12×36'), findsOneWidget);
@@ -38,15 +38,15 @@ void main() {
     final nav = GlobalKey<NavigatorState>();
     await tester.pumpWidget(ProviderScope(
       overrides: [appDatabaseProvider.overrideWith((ref) => db)],
-      child: MaterialApp(
+      child: CupertinoApp(
         navigatorKey: nav,
-        home: const Scaffold(
-          body: Center(child: Text('home')),
+        home: const CupertinoPageScaffold(
+          child: Center(child: Text('home')),
         ),
       ),
     ));
     nav.currentState!.push(
-      MaterialPageRoute<void>(builder: (_) => const EscalaPage()),
+      CupertinoPageRoute<void>(builder: (_) => const EscalaPage()),
     );
     await tester.pumpAndSettle();
     await tester.tap(find.text('Salvar'));
