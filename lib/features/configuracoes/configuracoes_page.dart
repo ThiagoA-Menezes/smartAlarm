@@ -15,7 +15,6 @@ class ConfiguracoesPage extends ConsumerWidget {
       navigationBar:
           const CupertinoNavigationBar(middle: Text('Configurações')),
       child: SafeArea(
-        top: false,
         child: ListView(
           children: [
             const SizedBox(height: 20),
