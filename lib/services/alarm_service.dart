@@ -39,7 +39,7 @@ class AlarmService {
       alarmSettings: AlarmSettings(
         id: id,
         dateTime: dateTime,
-        assetAudioPath: 'assets/audio/alarme.mp3',
+        assetAudioPath: 'assets/audio/alarme.wav',
         loopAudio: true,
         vibrate: true,
         fadeDuration: 3.0,
