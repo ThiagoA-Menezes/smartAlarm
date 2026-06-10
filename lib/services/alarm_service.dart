@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io' show Platform;
 
 import 'package:alarm/alarm.dart';
 import 'package:flutter/services.dart' show PlatformException;
@@ -33,6 +34,7 @@ class AlarmService {
     required DateTime dateTime,
     String titulo = '',
   }) async {
+    if (!Platform.isIOS && !Platform.isAndroid) return;
     await Alarm.set(
       alarmSettings: AlarmSettings(
         id: id,
@@ -52,6 +54,7 @@ class AlarmService {
   }
 
   static Future<void> cancelar(int id) async {
+    if (!Platform.isIOS && !Platform.isAndroid) return;
     await Alarm.stop(id);
   }
 
