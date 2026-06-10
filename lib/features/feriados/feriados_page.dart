@@ -321,7 +321,7 @@ class _FeriadoTile extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(
                   horizontal: 8, vertical: 3),
               decoration: BoxDecoration(
-                color: CupertinoColors.systemOrange.withOpacity(0.15),
+                color: CupertinoColors.systemOrange.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Text(
