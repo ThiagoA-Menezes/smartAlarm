@@ -137,7 +137,7 @@ class FeriadosPage extends ConsumerWidget {
                   ],
                 ),
               ),
-              const Divider(height: 0),
+              Container(height: 0.5, color: CupertinoColors.separator),
               Expanded(
                 child: ListView(
                   padding: const EdgeInsets.all(16),
