@@ -49,14 +49,12 @@ void main() {
   });
 
   testWidgets('alerta ao salvar sem dias selecionados', (tester) async {
-    final semantics = tester.ensureSemantics();
     await tester.pumpWidget(await _wrap(db));
     // Desmarca todos (padrão 0x1F = Seg–Sex, 5 dias selecionados)
-    for (final label in ['Seg', 'Ter', 'Qua', 'Qui', 'Sex']) {
-      await tester.tap(find.bySemanticsLabel(label));
+    for (var i = 0; i < 5; i++) {
+      await tester.tap(find.byKey(ValueKey('dia-$i')));
       await tester.pump();
     }
-    semantics.dispose();
     await tester.tap(find.text('Salvar'));
     await tester.pumpAndSettle();
     expect(find.text('Selecione ao menos um dia.'), findsOneWidget);

@@ -215,6 +215,7 @@ class _AlarmeCriarEditarPageState
               children: [
                 for (var i = 0; i < 7; i++)
                   _DiaBotao(
+                    key: ValueKey('dia-$i'),
                     label: _nomesDiasLong[i],
                     letra: _nomesDias[i],
                     selecionado: _diasDaSemana & (1 << i) != 0,
@@ -251,6 +252,7 @@ class _AlarmeCriarEditarPageState
 
 class _DiaBotao extends StatelessWidget {
   const _DiaBotao({
+    super.key,
     required this.label,
     required this.letra,
     required this.selecionado,
