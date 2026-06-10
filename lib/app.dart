@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart' show MissingPluginException, PlatformException;
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:alarme_feriados/features/alarme_tocando/alarme_tocando_page.dart';
@@ -66,6 +67,35 @@ class _AppState extends State<App> {
       if (aceitou == true) {
         await AlarmService.solicitarPermissoes();
       }
+
+      final ctxGps = _navigatorKey.currentContext;
+      if (ctxGps != null && ctxGps.mounted) {
+        final aceitouGps = await showCupertinoDialog<bool>(
+          context: ctxGps,
+          builder: (ctx) => CupertinoAlertDialog(
+            title: const Text('Usar sua localização'),
+            content: const Text(
+              'Com sua localização, o app aplica automaticamente os '
+              'feriados estaduais e municipais da sua cidade.',
+            ),
+            actions: [
+              CupertinoDialogAction(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('Agora não'),
+              ),
+              CupertinoDialogAction(
+                isDefaultAction: true,
+                onPressed: () => Navigator.pop(ctx, true),
+                child: const Text('Permitir'),
+              ),
+            ],
+          ),
+        );
+        if (aceitouGps == true) {
+          await Permission.locationWhenInUse.request();
+        }
+      }
+
       await prefs.setBool(_prefPermissoesSolicitadas, true);
     } on MissingPluginException {
       // Engine indisponível em testes host

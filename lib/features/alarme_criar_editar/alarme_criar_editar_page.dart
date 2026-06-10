@@ -191,7 +191,6 @@ class _AlarmeCriarEditarPageState
         ),
       ),
       child: SafeArea(
-        top: false,
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           children: [

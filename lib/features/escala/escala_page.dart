@@ -138,7 +138,6 @@ class _EscalaPageState extends ConsumerState<EscalaPage> {
         ),
       ),
       child: SafeArea(
-        top: false,
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [

@@ -35,7 +35,6 @@ class FeriadosPage extends ConsumerWidget {
         ),
       ),
       child: SafeArea(
-        top: false,
         child: state.when(
           loading: () =>
               const Center(child: CupertinoActivityIndicator()),

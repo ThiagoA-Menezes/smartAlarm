@@ -126,7 +126,6 @@ class _LocalizacaoPageState extends ConsumerState<LocalizacaoPage> {
         ),
       ),
       child: SafeArea(
-        top: false,
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [

@@ -42,7 +42,6 @@ class PermissoesPage extends ConsumerWidget {
       navigationBar: const CupertinoNavigationBar(
           middle: Text('Permissões e bateria')),
       child: SafeArea(
-        top: false,
         child: statusAsync.when(
           loading: () =>
               const Center(child: CupertinoActivityIndicator()),
