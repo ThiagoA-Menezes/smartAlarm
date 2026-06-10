@@ -1,8 +1,7 @@
 import 'dart:async';
-import 'dart:io' show Platform;
 
 import 'package:alarm/alarm.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter/services.dart' show PlatformException;
 import 'package:permission_handler/permission_handler.dart';
 
 class AlarmRingEvent {
@@ -13,32 +12,20 @@ class AlarmRingEvent {
 }
 
 class AlarmService {
-  static const _methodChannel = MethodChannel('alarme_feriados/alarm_kit');
-  static const _eventChannel = EventChannel('alarme_feriados/alarm_kit_events');
-
-  /// Stream de eventos de alarme tocando.
-  /// iOS: EventChannel nativo do AlarmKit; Android: Alarm.ringStream mapeado.
   static Stream<AlarmRingEvent> get ringStream {
-    if (Platform.isIOS) {
-      return _eventChannel.receiveBroadcastStream().map((event) {
-        final m = Map<String, dynamic>.from(event as Map);
-        return AlarmRingEvent(
-          id: m['id'] as int,
-          titulo: m['titulo'] as String? ?? '',
-        );
-      });
-    }
     return Alarm.ringStream.stream.map(
       (s) => AlarmRingEvent(id: s.id, titulo: s.notificationSettings.title),
     );
   }
 
-  /// Solicita as permissões necessárias para a plataforma atual.
-  /// Retorna true se todas as permissões foram concedidas.
   static Future<bool> solicitarPermissoes() async {
-    if (Platform.isAndroid) return _solicitarAndroid();
-    if (Platform.isIOS) return _solicitarIOS();
-    return true;
+    try {
+      final notifications = await Permission.notification.request();
+      final exactAlarm = await Permission.scheduleExactAlarm.request();
+      return notifications.isGranted && exactAlarm.isGranted;
+    } on PlatformException {
+      return false;
+    }
   }
 
   static Future<void> agendar({
@@ -46,15 +33,6 @@ class AlarmService {
     required DateTime dateTime,
     String titulo = '',
   }) async {
-    if (Platform.isIOS) {
-      await _methodChannel.invokeMethod<void>('scheduleAlarm', {
-        'id': id,
-        'epochMs': dateTime.millisecondsSinceEpoch,
-        'titulo': titulo.isEmpty ? 'Alarme Feriados' : titulo,
-      });
-      return;
-    }
-    if (!Platform.isAndroid) return;
     await Alarm.set(
       alarmSettings: AlarmSettings(
         id: id,
@@ -74,11 +52,6 @@ class AlarmService {
   }
 
   static Future<void> cancelar(int id) async {
-    if (Platform.isIOS) {
-      await _methodChannel.invokeMethod<void>('cancelAlarm', id);
-      return;
-    }
-    if (!Platform.isAndroid) return;
     await Alarm.stop(id);
   }
 
@@ -88,17 +61,5 @@ class AlarmService {
       id: id,
       dateTime: DateTime.now().add(Duration(minutes: minutos)),
     );
-  }
-
-  static Future<bool> _solicitarAndroid() async {
-    final exactAlarm = await Permission.scheduleExactAlarm.request();
-    final notifications = await Permission.notification.request();
-    return exactAlarm.isGranted && notifications.isGranted;
-  }
-
-  static Future<bool> _solicitarIOS() async {
-    final result =
-        await _methodChannel.invokeMethod<bool>('requestAlarmKitAuthorization');
-    return result ?? false;
   }
 }
