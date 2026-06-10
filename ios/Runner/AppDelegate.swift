@@ -1,4 +1,4 @@
-#if !targetEnvironment(simulator)
+#if canImport(AlarmKit)
 import AlarmKit
 #endif
 import AVFoundation
@@ -26,7 +26,7 @@ import UIKit
       binaryMessenger: controller.binaryMessenger
     )
     methodChannel.setMethodCallHandler { [weak self] call, result in
-      #if !targetEnvironment(simulator)
+      #if canImport(AlarmKit)
       guard #available(iOS 26.0, *) else {
         result(FlutterMethodNotImplemented)
         return
@@ -63,7 +63,7 @@ import UIKit
     )
     eventChannel.setStreamHandler(self)
 
-    #if !targetEnvironment(simulator)
+    #if canImport(AlarmKit)
     if #available(iOS 26.0, *) {
       AKAlarmManager.shared.delegate = self
     }
@@ -75,7 +75,7 @@ import UIKit
 
   // MARK: - AlarmKit
 
-  #if !targetEnvironment(simulator)
+  #if canImport(AlarmKit)
   @available(iOS 26.0, *)
   private func requestAuthorization() async -> Bool {
     do {
@@ -147,7 +147,7 @@ import UIKit
 
 // MARK: - AKAlarmDelegate
 
-#if !targetEnvironment(simulator)
+#if canImport(AlarmKit)
 @available(iOS 26.0, *)
 extension AppDelegate: AKAlarmDelegate {
   func alarmDidStart(_ alarm: AKAlarm) {
